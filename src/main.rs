@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use std::process::Command;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -32,7 +33,19 @@ fn main() {
             println!("ls!");
         }
         None => {
-            println!("fetch all!!")
+            let result = Command::new("git").arg("fetch").output();
+            match result {
+                Ok(res) => {
+                    if res.status.success() {
+                        println!("Fetch success");
+                    } else {
+                        println!("Fetch failed");
+                    }
+                }
+                _ => {
+                    println!("Fetch failed");
+                }
+            }
         }
     }
 }
