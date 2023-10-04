@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -31,7 +32,27 @@ fn main() {
             println!("Removed: {}", index);
         }
         Some(Commands::Ls {}) => {
-            println!("ls!");
+            // ファイルがないとき空ファイルを生成(write権限がないとcreateできない)
+            let mut file = match OpenOptions::new()
+                .write(true)
+                .create(true)
+                .read(true)
+                .open("fetchall_dirs.txt")
+            {
+                Err(e) => panic!("File open error: {}", e),
+                Ok(file) => file,
+            };
+            let mut str = String::new();
+            match file.read_to_string(&mut str) {
+                Err(e) => panic!("File read error: {}", e),
+                Ok(_) => {
+                    if str.is_empty() {
+                        println!("-- empty --")
+                    } else {
+                        println!("{}", str)
+                    }
+                }
+            }
         }
         None => {
             let result = Command::new("git").arg("fetch").output();
