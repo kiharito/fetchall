@@ -26,7 +26,15 @@ fn main() {
 
     match cli.command {
         Some(Commands::Add { path }) => {
-            println!("Added: {}", path);
+            let mut file = match OpenOptions::new().write(true).create(true).append(true).open("fetchall_dirs.txt") {
+                Err(e) => panic!("File open error: {}", e),
+                Ok(file) => file,
+            };
+            let path_str = path + "\n";
+            match file.write_all(path_str.as_ref()) {
+                Err(e) => panic!("File write error: {}", e),
+                Ok(_) => println!("successfully added"),
+            };
         }
         Some(Commands::Rm { index }) => {
             println!("Removed: {}", index);
