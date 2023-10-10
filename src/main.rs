@@ -25,7 +25,7 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let file_path = "fetchall_dirs.txt";
+    let file_path = ".fetchall_dirs.json";
 
     match cli.command {
         Some(Commands::Add { path }) => match directories::add_directory_path(file_path, path) {
