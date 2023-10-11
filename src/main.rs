@@ -1,6 +1,4 @@
 use clap::{Parser, Subcommand};
-use std::fs::OpenOptions;
-use std::io::prelude::*;
 use std::process::Command;
 
 mod directories;
@@ -35,29 +33,10 @@ fn main() {
         Some(Commands::Rm { index }) => {
             println!("Removed: {}", index);
         }
-        Some(Commands::Ls {}) => {
-            // ファイルがないとき空ファイルを生成(write権限がないとcreateできない)
-            let mut file = match OpenOptions::new()
-                .write(true)
-                .create(true)
-                .read(true)
-                .open("fetchall_dirs.txt")
-            {
-                Err(e) => panic!("File open error: {}", e),
-                Ok(file) => file,
-            };
-            let mut str = String::new();
-            match file.read_to_string(&mut str) {
-                Err(e) => panic!("File read error: {}", e),
-                Ok(_) => {
-                    if str.is_empty() {
-                        println!("-- empty --")
-                    } else {
-                        println!("{}", str)
-                    }
-                }
-            }
-        }
+        Some(Commands::Ls {}) => match directories::list(file_path) {
+            Err(e) => panic!("Ls failed: {}", e),
+            _ => {}
+        },
         None => {
             let result = Command::new("git").arg("fetch").output();
             match result {
