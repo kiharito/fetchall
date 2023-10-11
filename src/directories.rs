@@ -8,7 +8,7 @@ struct Directory {
     path: String,
 }
 
-pub fn add_directory_path(file_path: &str, path: String) -> Result<()> {
+pub fn add(file_path: &str, path: String) -> Result<()> {
     let file = OpenOptions::new()
         .write(true)
         .create(true)

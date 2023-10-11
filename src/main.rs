@@ -26,7 +26,7 @@ fn main() {
     let file_path = ".fetchall_dirs.json";
 
     match cli.command {
-        Some(Commands::Add { path }) => match directories::add_directory_path(file_path, path) {
+        Some(Commands::Add { path }) => match directories::add(file_path, path) {
             Err(e) => panic!("Add failed: {}", e),
             _ => {}
         },
