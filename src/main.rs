@@ -16,7 +16,7 @@ enum Commands {
     /// Add a directory path to the targets
     Add { path: String },
     /// Remove the specified directory path from the targets
-    Rm { index: u32 },
+    Rm { idx: usize },
     /// Show the list of the target directory paths
     Ls {},
 }
@@ -30,11 +30,12 @@ fn main() {
             Err(e) => panic!("Add failed: {}", e),
             _ => {}
         },
-        Some(Commands::Rm { index }) => {
-            println!("Removed: {}", index);
-        }
+        Some(Commands::Rm { idx }) => match directories::remove(file_path, idx) {
+            Err(e) => panic!("Remove failed: {}", e),
+            _ => {}
+        },
         Some(Commands::Ls {}) => match directories::list(file_path) {
-            Err(e) => panic!("Ls failed: {}", e),
+            Err(e) => panic!("List failed: {}", e),
             _ => {}
         },
         None => {
