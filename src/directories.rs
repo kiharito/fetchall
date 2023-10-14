@@ -9,58 +9,46 @@ struct Directory {
 }
 
 pub fn add(file_path: &str, path: String) -> Result<()> {
-    let file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .read(true)
-        .open(file_path)?;
-    let mut dirs: Vec<Directory> = match serde_json::from_reader(file) {
-        Ok(dirs) => dirs,
-        Err(e) if e.is_eof() => Vec::new(),
-        Err(e) => Err(e)?,
-    };
+    let mut dirs = load_dirs(file_path)?;
     dirs.push(Directory { path });
-    let file = OpenOptions::new().write(true).open(file_path)?;
-    serde_json::to_writer(file, &dirs)?;
-    Ok(())
+    save_dirs(file_path, &dirs)
 }
 
 pub fn remove(file_path: &str, idx: usize) -> Result<()> {
-    let file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .read(true)
-        .open(file_path)?;
-    let mut dirs: Vec<Directory> = match serde_json::from_reader(file) {
-        Ok(dirs) => dirs,
-        Err(e) if e.is_eof() => Vec::new(),
-        Err(e) => Err(e)?,
-    };
+    let mut dirs = load_dirs(file_path)?;
     if idx >= dirs.len() {
         return Err(Error::new(ErrorKind::InvalidInput, "Invalid Index"));
     }
     dirs.remove(idx);
-    let file = OpenOptions::new().write(true).open(file_path)?;
-    file.set_len(0)?;
-    serde_json::to_writer(file, &dirs)?;
-    Ok(())
+    save_dirs(file_path, &dirs)
 }
 
 pub fn list(file_path: &str) -> Result<()> {
-    let file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .read(true)
-        .open(file_path)?;
-    let dirs: Vec<Directory> = match serde_json::from_reader(file) {
-        Ok(dirs) => dirs,
-        Err(e) if e.is_eof() => Vec::new(),
-        Err(e) => Err(e)?,
-    };
+    let dirs = load_dirs(file_path)?;
     let mut idx = 0;
     for dir in dirs {
         println!("{}: {}", idx, dir.path);
         idx += 1;
     }
+    Ok(())
+}
+
+fn load_dirs(file_path: &str) -> Result<Vec<Directory>> {
+    let file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .read(true)
+        .open(file_path)?;
+    match serde_json::from_reader(file) {
+        Ok(dirs) => Ok(dirs),
+        Err(e) if e.is_eof() => Ok(Vec::new()),
+        Err(e) => Err(e)?,
+    }
+}
+
+fn save_dirs(file_path: &str, dirs: &Vec<Directory>) -> Result<()> {
+    let file = OpenOptions::new().write(true).open(file_path)?;
+    file.set_len(0)?;
+    serde_json::to_writer(file, &dirs)?;
     Ok(())
 }
