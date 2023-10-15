@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::OpenOptions;
 use std::io::{Error, ErrorKind, Result};
+use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Directory {
@@ -29,6 +30,30 @@ pub fn list(file_path: &str) -> Result<()> {
     for dir in dirs {
         println!("{}: {}", idx, dir.path);
         idx += 1;
+    }
+    Ok(())
+}
+
+pub fn fetchall(file_path: &str) -> Result<()> {
+    let dirs = load_dirs(file_path)?;
+    for dir in dirs {
+        let path = dir.path;
+        match Command::new("git").arg("fetch").current_dir(&path).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("Fetch succeeded at {}", path);
+                } else {
+                    println!(
+                        "Fetch failed at {}:\n{}",
+                        path,
+                        String::from_utf8(output.stderr).unwrap()
+                    );
+                }
+            }
+            Err(e) => {
+                println!("Fetch failed at {}:\n{:?}", path, e);
+            }
+        };
     }
     Ok(())
 }

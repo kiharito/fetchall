@@ -1,5 +1,4 @@
 use clap::{Parser, Subcommand};
-use std::process::Command;
 
 mod directories;
 
@@ -38,20 +37,9 @@ fn main() {
             Err(e) => panic!("List failed: {}", e),
             _ => {}
         },
-        None => {
-            let result = Command::new("git").arg("fetch").output();
-            match result {
-                Ok(res) => {
-                    if res.status.success() {
-                        println!("Fetch success");
-                    } else {
-                        println!("Fetch failed");
-                    }
-                }
-                _ => {
-                    println!("Fetch failed");
-                }
-            }
-        }
+        None => match directories::fetchall(file_path) {
+            Err(e) => panic!("Fetchall failed: {}", e),
+            _ => {}
+        },
     }
 }
