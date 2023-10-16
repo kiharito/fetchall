@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 mod directories;
@@ -20,26 +21,16 @@ enum Commands {
     Ls {},
 }
 
-fn main() {
+fn main() -> Result<()> {
     let cli = Cli::parse();
     let file_path = ".fetchall_dirs.json";
 
     match cli.command {
-        Some(Commands::Add { path }) => match directories::add(file_path, path) {
-            Err(e) => panic!("Add failed: {}", e),
-            _ => {}
-        },
-        Some(Commands::Rm { idx }) => match directories::remove(file_path, idx) {
-            Err(e) => panic!("Remove failed: {}", e),
-            _ => {}
-        },
-        Some(Commands::Ls {}) => match directories::list(file_path) {
-            Err(e) => panic!("List failed: {}", e),
-            _ => {}
-        },
-        None => match directories::fetchall(file_path) {
-            Err(e) => panic!("Fetchall failed: {}", e),
-            _ => {}
-        },
-    }
+        Some(Commands::Add { path }) => directories::add(file_path, path)?,
+        Some(Commands::Rm { idx }) => directories::remove(file_path, idx)?,
+        Some(Commands::Ls {}) => directories::list(file_path)?,
+        None => directories::fetchall(file_path)?,
+    };
+
+    Ok(())
 }
