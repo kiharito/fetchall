@@ -1,7 +1,7 @@
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::OpenOptions;
-use std::io::{Error, ErrorKind, Result};
 use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,7 +18,7 @@ pub fn add(file_path: &str, path: String) -> Result<()> {
 pub fn remove(file_path: &str, idx: usize) -> Result<()> {
     let mut dirs = load_dirs(file_path)?;
     if idx >= dirs.len() {
-        return Err(Error::new(ErrorKind::InvalidInput, "Invalid Index"));
+        return Err(anyhow!("Invalid Index"));
     }
     dirs.remove(idx);
     save_dirs(file_path, &dirs)
