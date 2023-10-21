@@ -1,6 +1,7 @@
 use crate::repository::Repository;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use spinners::{Spinner, Spinners};
 use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -37,20 +38,19 @@ pub fn fetchall(repo: &impl Repository) -> Result<()> {
     let dirs = repo.collect()?;
     for dir in dirs {
         let path = dir.path;
+        let mut sp = Spinner::new(Spinners::Line, format!("Fetching at {}", path));
         match Command::new("git").arg("fetch").current_dir(&path).output() {
             Ok(output) => {
                 if output.status.success() {
-                    println!("Fetch succeeded at {}", path);
+                    sp.stop_and_persist("✔", format!("Fetching at {} ... Done!", path));
                 } else {
-                    println!(
-                        "Fetch failed at {}:\n{}",
-                        path,
-                        String::from_utf8(output.stderr).unwrap()
-                    );
+                    sp.stop_and_persist("×", format!("Fetching at {} ... Failed!", path));
+                    println!("{}", String::from_utf8(output.stderr).unwrap());
                 }
             }
             Err(e) => {
-                println!("Fetch failed at {}:\n{:?}", path, e);
+                sp.stop_and_persist("×", format!("Fetching at {} ... Failed!", path));
+                println!("{:?}", e);
             }
         };
     }
