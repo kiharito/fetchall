@@ -1,7 +1,9 @@
+mod directories;
+mod repository;
+
+use crate::repository::JsonFileRepository;
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-
-mod directories;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -23,13 +25,13 @@ enum Commands {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let file_path = ".fetchall_dirs.json";
+    let repo = JsonFileRepository::new(".fetchall_dirs.json");
 
     match cli.command {
-        Some(Commands::Add { path }) => directories::add(file_path, path)?,
-        Some(Commands::Rm { idx }) => directories::remove(file_path, idx)?,
-        Some(Commands::Ls {}) => directories::list(file_path)?,
-        None => directories::fetchall(file_path)?,
+        Some(Commands::Add { path }) => directories::add(&repo, path)?,
+        Some(Commands::Rm { idx }) => directories::remove(&repo, idx)?,
+        Some(Commands::Ls {}) => directories::list(&repo)?,
+        None => directories::fetchall(&repo)?,
     };
 
     Ok(())

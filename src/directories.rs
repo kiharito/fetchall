@@ -1,31 +1,30 @@
+use crate::repository::Repository;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
-use serde_json;
-use std::fs::OpenOptions;
 use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Directory {
+pub struct Directory {
     path: String,
 }
 
-pub fn add(file_path: &str, path: String) -> Result<()> {
-    let mut dirs = load_dirs(file_path)?;
+pub fn add(repo: &impl Repository, path: String) -> Result<()> {
+    let mut dirs = repo.collect()?;
     dirs.push(Directory { path });
-    save_dirs(file_path, &dirs)
+    repo.save(&dirs)
 }
 
-pub fn remove(file_path: &str, idx: usize) -> Result<()> {
-    let mut dirs = load_dirs(file_path)?;
+pub fn remove(repo: &impl Repository, idx: usize) -> Result<()> {
+    let mut dirs = repo.collect()?;
     if idx >= dirs.len() {
         return Err(anyhow!("Invalid Index"));
     }
     dirs.remove(idx);
-    save_dirs(file_path, &dirs)
+    repo.save(&dirs)
 }
 
-pub fn list(file_path: &str) -> Result<()> {
-    let dirs = load_dirs(file_path)?;
+pub fn list(repo: &impl Repository) -> Result<()> {
+    let dirs = repo.collect()?;
     let mut idx = 0;
     for dir in dirs {
         println!("{}: {}", idx, dir.path);
@@ -34,8 +33,8 @@ pub fn list(file_path: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn fetchall(file_path: &str) -> Result<()> {
-    let dirs = load_dirs(file_path)?;
+pub fn fetchall(repo: &impl Repository) -> Result<()> {
+    let dirs = repo.collect()?;
     for dir in dirs {
         let path = dir.path;
         match Command::new("git").arg("fetch").current_dir(&path).output() {
@@ -55,25 +54,5 @@ pub fn fetchall(file_path: &str) -> Result<()> {
             }
         };
     }
-    Ok(())
-}
-
-fn load_dirs(file_path: &str) -> Result<Vec<Directory>> {
-    let file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .read(true)
-        .open(file_path)?;
-    match serde_json::from_reader(file) {
-        Ok(dirs) => Ok(dirs),
-        Err(e) if e.is_eof() => Ok(Vec::new()),
-        Err(e) => Err(e)?,
-    }
-}
-
-fn save_dirs(file_path: &str, dirs: &Vec<Directory>) -> Result<()> {
-    let file = OpenOptions::new().write(true).open(file_path)?;
-    file.set_len(0)?;
-    serde_json::to_writer(file, &dirs)?;
     Ok(())
 }
