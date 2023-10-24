@@ -2,6 +2,7 @@ use crate::repository::Repository;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use spinners::{Spinner, Spinners};
+use std::path::Path;
 use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -10,6 +11,9 @@ pub struct Directory {
 }
 
 pub fn add(repo: &impl Repository, path: String) -> Result<()> {
+    if !Path::new(&path).is_dir() {
+        return Err(anyhow!("No such directory"));
+    }
     let mut dirs = repo.collect()?;
     dirs.push(Directory { path });
     repo.save(&dirs)
@@ -18,7 +22,7 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
 pub fn remove(repo: &impl Repository, idx: usize) -> Result<()> {
     let mut dirs = repo.collect()?;
     if idx >= dirs.len() {
-        return Err(anyhow!("Invalid Index"));
+        return Err(anyhow!("Invalid index"));
     }
     dirs.remove(idx);
     repo.save(&dirs)
