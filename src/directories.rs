@@ -15,7 +15,13 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
         return Err(anyhow!("No such directory"));
     }
     let mut dirs = repo.collect()?;
-    dirs.push(Directory { path });
+    match dirs.iter().find(|&dir| dir.path == path) {
+        Some(_) => {
+            println!("Already exists");
+            return Ok(())
+        },
+        None => dirs.push(Directory { path }),
+    }
     repo.save(&dirs)
 }
 
