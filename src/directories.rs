@@ -2,6 +2,7 @@ use crate::repository::Repository;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use spinners::{Spinner, Spinners};
+use std::fs;
 use std::path::Path;
 use std::process::Command;
 
@@ -14,13 +15,18 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
     if !Path::new(&path).is_dir() {
         return Err(anyhow!("No such directory"));
     }
+    let abs_path = if Path::new(&path).is_absolute() {
+        path
+    } else {
+        fs::canonicalize(path)?.to_string_lossy().into_owned()
+    };
     let mut dirs = repo.collect()?;
-    match dirs.iter().find(|&dir| dir.path == path) {
+    match dirs.iter().find(|&dir| dir.path == abs_path) {
         Some(_) => {
             println!("Already exists");
-            return Ok(())
-        },
-        None => dirs.push(Directory { path }),
+            return Ok(());
+        }
+        None => dirs.push(Directory { path: abs_path }),
     }
     repo.save(&dirs)
 }
