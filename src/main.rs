@@ -10,17 +10,19 @@ use clap::{Parser, Subcommand};
 #[command(propagate_version = false)]
 struct Cli {
     #[command(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 }
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Add a directory path to the targets
+    /// Add a directory to the targets
     Add { path: String },
-    /// Remove the specified directory path from the targets
+    /// Remove the specified directory from the targets
     Rm { idx: usize },
-    /// Show the list of the target directory paths
+    /// Show the list of the target directories
     Ls {},
+    /// Run `git fetch` in each of the target directories
+    Exec {},
 }
 
 fn main() -> Result<()> {
@@ -28,10 +30,10 @@ fn main() -> Result<()> {
     let repo = JsonFileRepository::new(".fetchall_dirs.json");
 
     match cli.command {
-        Some(Commands::Add { path }) => directories::add(&repo, path)?,
-        Some(Commands::Rm { idx }) => directories::remove(&repo, idx)?,
-        Some(Commands::Ls {}) => directories::list(&repo)?,
-        None => directories::fetchall(&repo)?,
+        Commands::Add { path } => directories::add(&repo, path)?,
+        Commands::Rm { idx } => directories::remove(&repo, idx)?,
+        Commands::Ls {} => directories::list(&repo)?,
+        Commands::Exec {} => directories::exec(&repo)?,
     };
 
     Ok(())

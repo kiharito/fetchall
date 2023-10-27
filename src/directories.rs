@@ -67,7 +67,7 @@ pub fn list(repo: &impl Repository) -> Result<()> {
     Ok(())
 }
 
-pub fn fetchall(repo: &impl Repository) -> Result<()> {
+pub fn exec(repo: &impl Repository) -> Result<()> {
     let dirs = repo.collect()?;
     for dir in dirs {
         let path = dir.path;
@@ -88,12 +88,4 @@ pub fn fetchall(repo: &impl Repository) -> Result<()> {
         };
     }
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
