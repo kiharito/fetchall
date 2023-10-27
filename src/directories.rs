@@ -15,11 +15,27 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
     if !Path::new(&path).is_dir() {
         return Err(anyhow!("No such directory"));
     }
+
     let abs_path = if Path::new(&path).is_absolute() {
         path
     } else {
         fs::canonicalize(path)?.to_string_lossy().into_owned()
     };
+
+    match Command::new("git")
+        .arg("rev-parse")
+        .arg("--git-dir")
+        .current_dir(&abs_path)
+        .output()
+    {
+        Ok(output) => {
+            if !output.status.success() {
+                return Err(anyhow!("Not a git repository"));
+            }
+        }
+        Err(e) => return Err(e.into()),
+    }
+
     let mut dirs = repo.collect()?;
     match dirs.iter().find(|&dir| dir.path == abs_path) {
         Some(_) => {
@@ -28,6 +44,7 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
         }
         None => dirs.push(Directory { path: abs_path }),
     }
+
     repo.save(&dirs)
 }
 
