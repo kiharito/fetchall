@@ -22,7 +22,7 @@ enum Commands {
     /// Show the list of the target directories
     Ls {},
     /// Run `git fetch` in each of the target directories
-    Exec {},
+    Exec { options: Option<Vec<String>> },
 }
 
 fn main() -> Result<()> {
@@ -33,7 +33,7 @@ fn main() -> Result<()> {
         Commands::Add { path } => directories::add(&repo, path)?,
         Commands::Rm { idx } => directories::remove(&repo, idx)?,
         Commands::Ls {} => directories::list(&repo)?,
-        Commands::Exec {} => directories::exec(&repo)?,
+        Commands::Exec { options } => directories::exec(&repo, options)?,
     };
 
     Ok(())

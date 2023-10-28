@@ -67,12 +67,17 @@ pub fn list(repo: &impl Repository) -> Result<()> {
     Ok(())
 }
 
-pub fn exec(repo: &impl Repository) -> Result<()> {
+pub fn exec(repo: &impl Repository, options: Option<Vec<String>>) -> Result<()> {
     let dirs = repo.collect()?;
+    let mut binding = Command::new("git");
+    let cmd = match options {
+        Some(vec) => binding.arg("fetch").args(&vec),
+        None => binding.arg("fetch"),
+    };
     for dir in dirs {
         let path = dir.path;
         let mut sp = Spinner::new(Spinners::Line, format!("Fetching at {}", path));
-        match Command::new("git").arg("fetch").current_dir(&path).output() {
+        match cmd.current_dir(&path).output() {
             Ok(output) => {
                 if output.status.success() {
                     sp.stop_and_persist("✔", format!("Fetching at {} ... Done!", path));
