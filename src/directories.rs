@@ -50,7 +50,7 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
 
 pub fn remove(repo: &impl Repository, idx: usize) -> Result<()> {
     let mut dirs = repo.collect()?;
-    if idx >= dirs.len() {
+    if let None = dirs.get(idx) {
         return Err(anyhow!("Invalid index"));
     }
     dirs.remove(idx);
