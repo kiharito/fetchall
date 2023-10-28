@@ -23,7 +23,7 @@ Relative path is also available.
 fetchall add .
 ```
 
-### Run `git fetch` in each of the target directories
+### Run `git fetch` on all registered directories
 ```shell
 fetchall exec
 ```

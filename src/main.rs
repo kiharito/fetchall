@@ -21,7 +21,7 @@ enum Commands {
     Rm { idx: usize },
     /// Show the list of the target directories
     Ls {},
-    /// Run `git fetch` in each of the target directories
+    /// Run `git fetch` on all target directories
     Exec { options: Option<Vec<String>> },
 }
 
