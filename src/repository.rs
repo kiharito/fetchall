@@ -1,11 +1,10 @@
 use crate::directories::Directory;
 use anyhow::Result;
-use serde_json;
 use std::fs::OpenOptions;
 
 pub trait Repository {
     fn collect(&self) -> Result<Vec<Directory>>;
-    fn save(&self, _: &Vec<Directory>) -> Result<()>;
+    fn save(&self, _: &[Directory]) -> Result<()>;
 }
 
 pub struct JsonFileRepository<'a> {
@@ -24,15 +23,15 @@ impl Repository for JsonFileRepository<'_> {
             .write(true)
             .create(true)
             .read(true)
-            .open(&self.file_path)?;
+            .open(self.file_path)?;
         match serde_json::from_reader(file) {
             Ok(dirs) => Ok(dirs),
             Err(e) if e.is_eof() => Ok(Vec::new()),
             Err(e) => Err(e)?,
         }
     }
-    fn save(&self, dirs: &Vec<Directory>) -> Result<()> {
-        let file = OpenOptions::new().write(true).open(&self.file_path)?;
+    fn save(&self, dirs: &[Directory]) -> Result<()> {
+        let file = OpenOptions::new().write(true).open(self.file_path)?;
         file.set_len(0)?;
         serde_json::to_writer(file, &dirs)?;
         Ok(())

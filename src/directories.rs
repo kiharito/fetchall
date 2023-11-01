@@ -50,7 +50,7 @@ pub fn add(repo: &impl Repository, path: String) -> Result<()> {
 
 pub fn remove(repo: &impl Repository, idx: usize) -> Result<()> {
     let mut dirs = repo.collect()?;
-    if let None = dirs.get(idx) {
+    if dirs.get(idx).is_none() {
         return Err(anyhow!("Invalid index"));
     }
     dirs.remove(idx);
@@ -59,10 +59,8 @@ pub fn remove(repo: &impl Repository, idx: usize) -> Result<()> {
 
 pub fn list(repo: &impl Repository) -> Result<()> {
     let dirs = repo.collect()?;
-    let mut idx = 0;
-    for dir in dirs {
+    for (idx, dir) in dirs.into_iter().enumerate() {
         println!("{idx}: {}", dir.path);
-        idx += 1;
     }
     Ok(())
 }
