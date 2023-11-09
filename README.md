@@ -4,13 +4,18 @@ This CLI app runs `git fetch` on all registered directories at once.
 
 ## Installation
 
-You can install this app using cargo.
+### Cargo
 After [installing cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html),
 ```shell
 cargo install --git https://github.com/kiharito/fetchall
 ```
 
-You can also download the binary files directly.
+### Homebrew
+```shell
+brew install kiharito/tap/fetchall
+```
+
+### Binary
 [See Assets in the Release](https://github.com/kiharito/fetchall/releases/latest).
 
 ## Usage
@@ -29,7 +34,7 @@ fetchall exec
 ```
 [Git fetch options](https://git-scm.com/docs/git-fetch#_options) may be specified.
 ```shell
-fetchall exec -p
+fetchall exec -- -p
 ```
 
 ### Show the list of the target directories
