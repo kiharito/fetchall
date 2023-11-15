@@ -74,7 +74,7 @@ pub fn exec(repo: &impl Repository, options: Option<Vec<String>>) -> Result<()> 
     };
     for dir in dirs {
         let path = dir.path;
-        let mut sp = Spinner::new(Spinners::Line, format!("Fetching at {path}"));
+        let mut sp = Spinner::new(Spinners::Line, format!("Fetching at {path} ... "));
         match cmd.current_dir(&path).output() {
             Ok(output) => {
                 if output.status.success() {
